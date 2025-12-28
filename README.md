@@ -1,103 +1,139 @@
-# SMS Spam Analytics
+# SMS Spam Detector
 
-A data analytics project demonstrating **Pandas** and **NumPy** through analysis of the UCI SMS Spam Collection dataset.
+A complete SMS spam detection system with interactive analytics, machine learning classification, and a REST API for real-time predictions.
 
-## Overview
+## 🎯 Overview
 
-This project analyzes the SMS Spam Collection dataset to identify patterns and characteristics that distinguish spam messages from legitimate (ham) messages. All analysis is performed using only Pandas and NumPy.
+This project analyzes the UCI SMS Spam Collection dataset to:
+1. **Explore** spam patterns with interactive Altair visualizations
+2. **Train** a machine learning model using sentence embeddings
+3. **Deploy** a FastAPI service for real-time spam detection via Docker
 
-## Dataset
+## 🏗️ Architecture
+
+```
+┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│   SMS Message   │────▶│ Sentence-BERT    │────▶│ Logistic        │
+│   (text input)  │     │ (384-dim vector) │     │ Regression      │
+└─────────────────┘     └──────────────────┘     └────────┬────────┘
+                                                          │
+                                                          ▼
+                                                 ┌─────────────────┐
+                                                 │ Spam Probability│
+                                                 │   (0-100%)      │
+                                                 └─────────────────┘
+```
+
+### How It Works
+
+1. **Text Embedding**: Each message is converted to a 384-dimensional vector using `all-MiniLM-L6-v2` (a lightweight Sentence-BERT model). This captures semantic meaning.
+
+2. **Classification**: A Logistic Regression model trained on these embeddings predicts spam probability with calibrated outputs.
+
+3. **API**: FastAPI serves predictions via REST endpoints, packaged in Docker for easy deployment.
+
+## 📊 Dataset
 
 **SMS Spam Collection** from UCI Machine Learning Repository
-- 5,574 SMS messages
-- Binary labels: 'ham' (legitimate) or 'spam'
+- **5,574** SMS messages
+- **86.6%** ham (legitimate) / **13.4%** spam
 - Source: https://archive.ics.uci.edu/dataset/228/sms+spam+collection
 
-### Download Instructions
+## 🔬 Model Performance
 
-1. Download from: https://archive.ics.uci.edu/static/public/228/sms+spam+collection.zip
-2. Extract 'SMSSpamCollection' file
-3. Place it in the 'data/' folder
+| Metric | Score |
+|--------|-------|
+| **Accuracy** | 97.73% |
+| **Precision (spam)** | 98% |
+| **Recall (spam)** | 88% |
+| **F1-Score (spam)** | 93% |
 
-## Features
-
-- **Basic Statistics** - Message counts, averages by label
-- **Feature Engineering** - Length, word count, uppercase ratio, special characters
-- **Length Distribution** - Analyze message lengths across spam/ham
-- **Spam Indicators** - Identify keywords strongly associated with spam
-- **Word Frequency** - Top words in spam vs ham messages
-- **Percentile Analysis** - Statistical distribution of message lengths
-
-## Technologies
-
-| Library | Version | Purpose |
-|---------|---------|---------|
-| Python  | 3.8+    | Core language |
-| Pandas  | 2.0+    | Data manipulation & analysis |
-| NumPy   | 1.24+   | Numerical operations |
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 message-analytics/
 ├── README.md
+├── Dockerfile
+├── pyproject.toml
 ├── requirements.txt
 ├── data/
 │   └── SMSSpamCollection
+├── models/
+│   └── spam_classifier.joblib
 └── src/
-    ├── data_loader.py
-    ├── analytics.py
-    └── main.py
+    ├── sms_spam_analytics.ipynb
+    └── api/
+        └── main.py
 ```
 
-## Getting Started
+## 🚀 Quick Start
 
-### Prerequisites
+### Option 1: Run with Docker (Recommended)
 
 ```bash
-pip install pandas numpy
+docker build -t spam-detector .
+docker run -p 8000:8000 spam-detector
 ```
 
-Or use the requirements file:
+Test the API:
+```bash
+curl -X POST http://localhost:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Congratulations! You won a FREE prize!"}'
+```
+
+### Option 2: Run Locally
 
 ```bash
 pip install -r requirements.txt
+uvicorn src.api.main:app --reload
 ```
 
-### Running the Analysis
+## 🔌 API Endpoints
 
-```bash
-cd src
-python main.py
+### Health Check
+```
+GET /health
 ```
 
-## Sample Output
-
+### Predict Spam
 ```
-============================================================
-  DATASET SUMMARY
-============================================================
-Total Messages:     5,574
-Ham (legitimate):   4,827 (86.6%)
-Spam:               747 (13.4%)
-Avg Spam Length:    138.67 characters
-Avg Ham Length:     71.48 characters
+POST /predict
+Content-Type: application/json
+
+{"message": "Your text message here"}
 ```
 
-## Pandas/NumPy Concepts Demonstrated
+Response:
+```json
+{
+  "message": "Your text message here",
+  "spam_probability": 92.36,
+  "is_spam": true
+}
+```
 
-| Concept | Implementation |
-|---------|---------------|
-| Data loading | 'pd.read_csv()' with custom separators |
-| String operations | '.str.len()', '.str.contains()', '.str.count()' |
-| GroupBy aggregations | '.groupby().agg()' |
-| Binning | 'pd.cut()' |
-| Pivot tables | '.pivot()', '.unstack()' |
-| Percentiles | 'np.percentile()' |
-| Boolean indexing | Filtering by condition |
-| Statistical functions | '.mean()', '.std()', '.value_counts()' |
+### Interactive Docs
+Visit http://localhost:8000/docs for Swagger UI
 
-## Citation
+## 📈 Key Findings
+
+| Indicator | Spam vs Ham |
+|-----------|-------------|
+| Message Length | 1.94x longer |
+| Uppercase Ratio | 3.37x higher |
+| Exclamation Marks | 3.53x more |
+
+## 🛠️ Technologies
+
+| Component | Technology |
+|-----------|------------|
+| Analytics | Pandas, NumPy, Altair |
+| ML Model | Sentence-Transformers, Scikit-learn |
+| API | FastAPI, Uvicorn |
+| Container | Docker, UV |
+
+## 📚 Citation
 
 Almeida, T. & Hidalgo, J. (2011). SMS Spam Collection [Dataset]. UCI Machine Learning Repository. https://doi.org/10.24432/C5CC84
 
