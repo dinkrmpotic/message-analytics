@@ -12,37 +12,23 @@ This project analyzes the UCI SMS Spam Collection dataset to:
 ## 🏗️ Architecture
 
 ```
-      ┌───────────────┐
-      │  SMS Message  │
-      │  (text input) │
-      └───────┬───────┘
-              │
-              ▼
-      ┌───────────────┐
-      │  Sentence-BERT│
-      │  (384-dim vec)│
-      └───────┬───────┘
-              │
-              ▼
-      ┌───────────────┐
-      │ Logistic      │
-      │ Regression    │
-      └───────┬───────┘
-              │
-              ▼
-      ┌───────────────┐
-      │ Spam          │
-      | Probability   │
-      │    (0-100%)   │
-      └───────────────┘
-
+┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│   SMS Message   │────▶│ Sentence-BERT    │────▶│ Logistic        │
+│   (text input)  │     │ (384-dim vector) │     │ Regression      │
+└─────────────────┘     └──────────────────┘     └────────┬────────┘
+                                                          │
+                                                          ▼
+                                                 ┌─────────────────┐
+                                                 │ Spam Probability│
+                                                 │   (0-100%)      │
+                                                 └─────────────────┘
 ```
 
 ### How It Works
 
-1. **Text Embedding**: Each message is converted to a 384-dimensional vector using `all-MiniLM-L6-v2` (a lightweight Sentence-BERT model). This captures semantic meaning.
+1. **Text Embedding**: Each message is converted to a 384-dimensional vector using `all-MiniLM-L6-v2` (a lightweight Sentence-BERT model). This captures semantic meaning - similar messages have similar vectors.
 
-2. **Classification**: A Logistic Regression model trained on these embeddings predicts spam probability with calibrated outputs.
+2. **Classification**: A Logistic Regression model trained on these embeddings predicts spam probability. It outputs calibrated probabilities (not just yes/no).
 
 3. **API**: FastAPI serves predictions via REST endpoints, packaged in Docker for easy deployment.
 
@@ -67,17 +53,16 @@ This project analyzes the UCI SMS Spam Collection dataset to:
 ```
 message-analytics/
 ├── README.md
-├── Dockerfile
-├── pyproject.toml
-├── requirements.txt
+├── Dockerfile              # Container definition
+├── pyproject.toml          # Dependencies (UV/pip)
 ├── data/
-│   └── SMSSpamCollection
+│   └── SMSSpamCollection   # Dataset
 ├── models/
-│   └── spam_classifier.joblib
+│   └── spam_classifier.joblib  # Trained model
 └── src/
-    ├── sms_spam_analytics.ipynb
+    ├── sms_spam_analytics.ipynb  # Analysis + training notebook
     └── api/
-        └── main.py
+        └── main.py         # FastAPI application
 ```
 
 ## 🚀 Quick Start
@@ -85,40 +70,41 @@ message-analytics/
 ### Option 1: Run with Docker (Recommended)
 
 ```bash
+# Build the image
 docker build -t spam-detector .
+
+# Run the container
 docker run -p 8000:8000 spam-detector
-```
 
-Test the API:
-
-**Linux/Mac:**
-```bash
+# Test the API
 curl -X POST http://localhost:8000/predict \
   -H "Content-Type: application/json" \
   -d '{"message": "Congratulations! You won a FREE prize!"}'
 ```
 
-**Windows PowerShell:**
-```powershell
-Invoke-RestMethod -Uri "http://localhost:8000/predict" -Method POST -ContentType "application/json" -Body '{"message": "Congratulations! You won a FREE prize!"}'
-```
-
 ### Option 2: Run Locally
 
 ```bash
+# Install dependencies
 pip install -r requirements.txt
+
+# Run the notebook for analysis
+jupyter notebook src/sms_spam_analytics.ipynb
+
+# Start the API
 uvicorn src.api.main:app --reload
 ```
 
 ## 🔌 API Endpoints
 
 ### Health Check
-```
+```http
 GET /health
 ```
+Response: `{"status": "healthy"}`
 
 ### Predict Spam
-```
+```http
 POST /predict
 Content-Type: application/json
 
@@ -135,15 +121,16 @@ Response:
 ```
 
 ### Interactive Docs
-Visit http://localhost:8000/docs for Swagger UI
+Visit `http://localhost:8000/docs` for Swagger UI
 
-## 📈 Key Findings
+## 📈 Key Findings from Analysis
 
-| Indicator | Spam vs Ham |
-|-----------|-------------|
+| Indicator | Spam vs Ham Ratio |
+|-----------|-------------------|
 | Message Length | 1.94x longer |
 | Uppercase Ratio | 3.37x higher |
 | Exclamation Marks | 3.53x more |
+| Currency Symbols | 18.7% of spam vs 0.2% ham |
 
 ## 🛠️ Technologies
 
@@ -152,16 +139,39 @@ Visit http://localhost:8000/docs for Swagger UI
 | Analytics | Pandas, NumPy, Altair |
 | ML Model | Sentence-Transformers, Scikit-learn |
 | API | FastAPI, Uvicorn |
-| Container | Docker, UV |
+| Container | Docker, UV (fast Python packaging) |
+
+## 📓 Notebook Contents
+
+The Jupyter notebook includes:
+1. **Data Loading & Feature Engineering**
+2. **Distribution Visualizations** (pie charts, histograms, box plots)
+3. **Feature Comparison** (grouped bar charts, scatter plots)
+4. **Word Frequency Analysis**
+5. **Spam Indicator Analysis** (uppercase, currency, exclamation marks)
+6. **ML Model Training & Evaluation**
+
+## 🔧 Development
+
+```bash
+# Install dev dependencies
+pip install pandas numpy altair sentence-transformers scikit-learn fastapi uvicorn
+
+# Train a new model (run notebook cells)
+jupyter notebook src/sms_spam_analytics.ipynb
+
+# Test API locally
+uvicorn src.api.main:app --reload --port 8000
+```
 
 ## 📚 Citation
 
 Almeida, T. & Hidalgo, J. (2011). SMS Spam Collection [Dataset]. UCI Machine Learning Repository. https://doi.org/10.24432/C5CC84
 
-## Authors
+## 👤 Author
 
-**Din Krmpotić**
+**Din**
 
-## License
+## 📄 License
 
-This project is open source and available under the [MIT License](LICENSE).
+MIT License
