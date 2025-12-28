@@ -76,10 +76,17 @@ docker run -p 8000:8000 spam-detector
 ```
 
 Test the API:
+
+**Linux/Mac:**
 ```bash
 curl -X POST http://localhost:8000/predict \
   -H "Content-Type: application/json" \
   -d '{"message": "Congratulations! You won a FREE prize!"}'
+```
+
+**Windows PowerShell:**
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8000/predict" -Method POST -ContentType "application/json" -Body '{"message": "Congratulations! You won a FREE prize!"}'
 ```
 
 ### Option 2: Run Locally
