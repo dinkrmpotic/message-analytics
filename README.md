@@ -13,15 +13,15 @@ This project analyzes the UCI SMS Spam Collection dataset to:
 
 ```
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│   SMS Message   │────▶│ Sentence-BERT    │────▶│ Logistic        │
-│   (text input)  │     │ (384-dim vector) │     │ Regression      │
+│   SMS Message   │────▶│  Sentence-BERT   │────▶│    Logistic     │
+│   (text input)  │     │ (384-dim vector) │     │   Regression    │
 └─────────────────┘     └──────────────────┘     └────────┬────────┘
-                                                          │
-                                                          ▼
-                                                 ┌─────────────────┐
-                                                 │ Spam Probability│
-                                                 │   (0-100%)      │
-                                                 └─────────────────┘
+                                                         │
+                                                         ▼
+                                                ┌─────────────────┐
+                                                │ Spam Probability│
+                                                │    (0-100%)     │
+                                                └─────────────────┘
 ```
 
 ### How It Works
