@@ -29,5 +29,5 @@ uv.lock
 # Local scripts
 run_api.ps1
 
-# Data files (uncomment if you don't want to track data)
+# Data files
 # data/
